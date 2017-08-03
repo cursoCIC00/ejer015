@@ -19,17 +19,24 @@ namespace ejer15.Controllers
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
+        private IEntradasService entradasService;
+
+        public EntradasController(IEntradasService _entradasService)
+        {
+            this.entradasService = _entradasService;
+        }
+
         // GET: api/Entradas
         public IQueryable<Entrada> GetEntradas()
         {
-            return db.Entradas;
+            return entradasService.Get();
         }
 
         // GET: api/Entradas/5
         [ResponseType(typeof(Entrada))]
         public IHttpActionResult GetEntrada(long id)
         {
-            Entrada entrada = db.Entradas.Find(id);
+            Entrada entrada = entradasService.Get(id);
             if (entrada == null)
             {
                 return NotFound();
@@ -52,22 +59,13 @@ namespace ejer15.Controllers
                 return BadRequest();
             }
 
-            db.Entry(entrada).State = EntityState.Modified;
-
             try
             {
-                db.SaveChanges();
+                entradasService.Put(entrada);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (NoEncontradoException)
             {
-                if (!EntradaExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return StatusCode(HttpStatusCode.NoContent);
@@ -82,10 +80,6 @@ namespace ejer15.Controllers
                 return BadRequest(ModelState);
             }
 
-
-            IEntradasRepository entradasRepository = new EntradasRepository();
-            IEntradasService entradasService = new EntradasService(entradasRepository);
-
             entrada = entradasService.Create(entrada);
 
             return CreatedAtRoute("DefaultApi", new { id = entrada.Id }, entrada);
@@ -95,30 +89,17 @@ namespace ejer15.Controllers
         [ResponseType(typeof(Entrada))]
         public IHttpActionResult DeleteEntrada(long id)
         {
-            Entrada entrada = db.Entradas.Find(id);
-            if (entrada == null)
+            Entrada entrada;
+            try
+            {
+                entrada = entradasService.Delete(id);
+            }
+            catch (NoEncontradoException)
             {
                 return NotFound();
             }
 
-            db.Entradas.Remove(entrada);
-            db.SaveChanges();
-
             return Ok(entrada);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        private bool EntradaExists(long id)
-        {
-            return db.Entradas.Count(e => e.Id == id) > 0;
         }
     }
 }
