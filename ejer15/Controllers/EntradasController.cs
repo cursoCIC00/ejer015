@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
+﻿
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
-using ejer15;
 using ejer15.Models;
-using ejer15.Repository;
 using ejer15.Servicios;
 
 namespace ejer15.Controllers
 {
     public class EntradasController : ApiController
     {
-        private ApplicationDbContext db = new ApplicationDbContext();
-
         private IEntradasService entradasService;
 
         public EntradasController(IEntradasService _entradasService)
