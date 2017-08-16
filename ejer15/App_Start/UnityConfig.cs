@@ -59,6 +59,7 @@ namespace ejer15
                         catch (Exception e)
                         {
                             dbContextTransaction.Rollback();
+                            ApplicationDbContext.applicationDbContext = null;
                             throw new Exception("He hecho rollback de la transacción", e);
                         }
                     }
